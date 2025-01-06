@@ -121,7 +121,7 @@ const createWindow = () => {
 
   mainWindow = new BrowserWindow({
     ...windowConfig,
-    icon: path.join(__dirname, "../build/favicon.ico"),
+    icon: path.join(__dirname, "assets/favicon.ico"),
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, "electron-preload.js"),

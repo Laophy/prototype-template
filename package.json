@@ -68,16 +68,16 @@
         "fish"
       ]
     },
-    "icon": "build/favicon.ico",
+    "icon": "public/assets/favicon.ico",
     "win": {
       "target": "nsis",
-      "icon": "build/favicon.ico"
+      "icon": "public/assets/favicon.ico"
     },
     "mac": {
-      "icon": "build/favicon.icns"
+      "icon": "public/assets/favicon.icns"
     },
     "linux": {
-      "icon": "build/favicon.png"
+      "icon": "public/assets/favicon.png"
     }
   },
   "scripts": {
