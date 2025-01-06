@@ -2,8 +2,9 @@
  * Imports
  */
 const electron = require("electron");
-const isDev = require("electron-is-dev");
+const isDev = !electron.app.isPackaged || process.env.NODE_ENV === "dev";
 const steamworks = require("steamworks.js");
+const fs = require("fs");
 const path = require("path");
 const Store = require("electron-store");
 const log = require("electron-log");
@@ -11,19 +12,21 @@ const log = require("electron-log");
 /**
  * Configuration
  */
-const fs = require("fs");
-const path = require("path");
-
-const steamAppIdPath = path.join(__dirname, "..", "steam_appid.txt");
-const steamAppId = fs.readFileSync(steamAppIdPath, "utf8").trim();
-
 const CONFIG = {
-  STEAM_APP_ID: steamAppId,
+  STEAM_APP_ID: null,
   WINDOW_DEFAULTS: {
     fullscreen: true,
   },
   DEV_SERVER_URL: "http://localhost:3000",
 };
+
+const steamAppIdPath = path.join(__dirname, "..", "steam_appid.txt");
+
+try {
+  CONFIG.STEAM_APP_ID = fs.readFileSync(steamAppIdPath, "utf8").trim();
+} catch (err) {
+  log.warn("Could not read steam_appid.txt:", err);
+}
 
 /**
  * Global Variables
@@ -56,9 +59,14 @@ const setupAppSettings = () => {
  */
 const initSteamworks = () => {
   try {
-    steamClient = steamworks.init(CONFIG.STEAM_APP_ID);
+    const appId = parseInt(CONFIG.STEAM_APP_ID, 10);
+    if (isNaN(appId)) {
+      log.warn("Invalid Steam App ID");
+      return false;
+    }
+    steamClient = steamworks.init(appId);
     setupSteamIPC();
-    log.info(`Steam initialized for app ${CONFIG.STEAM_APP_ID}`);
+    log.info(`Steam initialized for app ${appId}`);
     return true;
   } catch (err) {
     log.error("Steam initialization failed:", err);
@@ -99,7 +107,7 @@ const createWindow = () => {
     ? {
         x: 0,
         y: 0,
-        width: Math.floor(width / 2),
+        width: width,
         height: height,
       }
     : {
@@ -111,17 +119,17 @@ const createWindow = () => {
         center: true,
       };
 
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     ...windowConfig,
     icon: path.join(__dirname, "../build/favicon.ico"),
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, "electron-preload.js"),
-      nodeIntegration: true,
-      contextIsolation: false,
-      webSecurity: false,
-      allowRunningInsecureContent: true,
-      enableRemoteModule: true,
+      nodeIntegration: false,
+      contextIsolation: true,
+      webSecurity: true,
+      allowRunningInsecureContent: false,
+      enableRemoteModule: false,
       webAudio: true,
       fullscreen: true,
     },
@@ -156,10 +164,52 @@ const createWindow = () => {
   });
 
   // Load the app
-  mainWindow.loadURL(
-    isDev
-      ? CONFIG.DEV_SERVER_URL
-      : `file://${path.join(__dirname, "../build/index.html")}`
+  const loadApp = async () => {
+    const devServerUrl = "http://localhost:3000";
+
+    if (isDev) {
+      try {
+        // Wait for dev server to be ready
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // Give React time to start
+        await mainWindow.loadURL(devServerUrl);
+        console.log("Development server loaded successfully");
+
+        // Open DevTools in detached mode
+        mainWindow.webContents.openDevTools({ mode: "detach" });
+      } catch (err) {
+        console.error("Failed to load dev server:", err);
+        console.error(
+          "Please ensure React development server is running on port 3000"
+        );
+        app.quit();
+      }
+    } else {
+      try {
+        const buildPath = path.join(__dirname, "../build/index.html");
+        await mainWindow.loadFile(buildPath);
+      } catch (err) {
+        console.error("Failed to load production build:", err);
+        app.quit();
+      }
+    }
+  };
+
+  loadApp().catch((err) => {
+    console.error("Failed to load application:", err);
+  });
+
+  // Add more detailed error logging
+  mainWindow.webContents.on(
+    "did-fail-load",
+    (_, errorCode, errorDescription) => {
+      console.error(`Page failed to load: ${errorCode} - ${errorDescription}`);
+      if (isDev) {
+        setTimeout(() => {
+          console.log("Attempting to reload after failure...");
+          mainWindow.loadURL("http://localhost:3000");
+        }, 5000);
+      }
+    }
   );
 
   // Setup window events
@@ -168,6 +218,30 @@ const createWindow = () => {
   // Prevent window from leaving fullscreen
   mainWindow.on("leave-full-screen", () => {
     mainWindow.setFullScreen(true);
+  });
+
+  if (isDev) {
+    console.log("Running in development mode");
+    console.log("Current directory:", __dirname);
+    console.log(
+      "Loading URL:",
+      isDev
+        ? "http://localhost:3000"
+        : `file://${path.join(__dirname, "../build/index.html")}`
+    );
+  }
+
+  // Add webContents logging
+  mainWindow.webContents.on("dom-ready", () => {
+    console.log("DOM is ready");
+  });
+
+  mainWindow.webContents.on("did-start-loading", () => {
+    console.log("Started loading content");
+  });
+
+  mainWindow.webContents.on("did-finish-load", () => {
+    console.log("Finished loading content");
   });
 
   return mainWindow;
@@ -214,27 +288,31 @@ const setupIPC = () => {
  * App Initialization
  */
 const initialize = async () => {
-  // Ensure single instance
-  if (!app.requestSingleInstanceLock()) {
-    app.quit();
-    return;
-  }
+  try {
+    if (!app.requestSingleInstanceLock()) {
+      app.quit();
+      return;
+    }
 
-  setupAppSettings();
+    setupAppSettings();
 
-  app.whenReady().then(() => {
+    await app.whenReady();
+
     if (!initSteamworks()) {
       log.warn("Application starting without Steam integration");
     }
 
-    createWindow();
+    mainWindow = createWindow();
     setupIPC();
     setupProductionRestrictions();
     setupErrorHandling();
-  });
 
-  app.on("window-all-closed", () => app.quit());
-  process.on("exit", () => app.quit());
+    app.on("window-all-closed", () => app.quit());
+    process.on("exit", () => app.quit());
+  } catch (err) {
+    log.error("Initialization failed:", err);
+    app.quit();
+  }
 };
 
 /**

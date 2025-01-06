@@ -1,19 +1,12 @@
-const { ipcRenderer, contextBridge } = require("electron");
+const { contextBridge, ipcRenderer } = require("electron");
 
-// Keep the existing API methods separate
-contextBridge.exposeInMainWorld("electronAPI", {
-  link: (link) => {
-    let event = ipcRenderer.send("link", link);
-    return () => event.removeListener("link");
-  },
-  toggle_fullscreen: () => {
-    let event = ipcRenderer.send("toggle_fullscreen");
-    return () => event.removeListener("toggle_fullscreen");
-  },
-  quit: () => {
-    let event = ipcRenderer.send("quit");
-    return () => event.removeListener("quit");
+contextBridge.exposeInMainWorld("electron", {
+  ipcRenderer: {
+    send: (channel, data) => {
+      ipcRenderer.send(channel, data);
+    },
+    on: (channel, func) => {
+      ipcRenderer.on(channel, (event, ...args) => func(...args));
+    },
   },
 });
-// Simplify the electron context bridge
-contextBridge.exposeInMainWorld("electron", {});

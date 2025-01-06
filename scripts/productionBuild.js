@@ -66,34 +66,34 @@ async function createZip(sourceDir, outPath) {
   });
 }
 
-function cleanupOldVersions(currentVersion) {
-  const files = fs.readdirSync(BUILD_DIR);
-  const versionPattern = new RegExp(`^${APP_NAME}_\\d+\\.\\d+\\.\\d+`);
+// function cleanupOldVersions(currentVersion) {
+//   const files = fs.readdirSync(BUILD_DIR);
+//   const versionPattern = new RegExp(`^${APP_NAME}_\\d+\\.\\d+\\.\\d+`);
 
-  // Find and remove old version folders, keeping only the current version
-  files.forEach((file) => {
-    const fullPath = path.join(BUILD_DIR, file);
-    // Skip if it's the current version's folder or zip file
-    if (
-      file === `${APP_NAME}_${currentVersion}_steam` ||
-      file === `${APP_NAME}_${currentVersion}_steam.zip`
-    ) {
-      return;
-    }
+//   // Find and remove old version folders, keeping only the current version
+//   files.forEach((file) => {
+//     const fullPath = path.join(BUILD_DIR, file);
+//     // Skip if it's the current version's folder or zip file
+//     if (
+//       file === `${APP_NAME}_${currentVersion}_steam` ||
+//       file === `${APP_NAME}_${currentVersion}_steam.zip`
+//     ) {
+//       return;
+//     }
 
-    // Only remove files/folders that match the version pattern (e.g., name_1.2.3)
-    if (versionPattern.test(file)) {
-      if (fs.statSync(fullPath).isDirectory() || file.endsWith(".zip")) {
-        console.log(`Removing old version: ${file}`);
-        if (fs.statSync(fullPath).isDirectory()) {
-          fs.rmSync(fullPath, { recursive: true });
-        } else {
-          fs.unlinkSync(fullPath);
-        }
-      }
-    }
-  });
-}
+//     // Only remove files/folders that match the version pattern (e.g., name_1.2.3)
+//     if (versionPattern.test(file)) {
+//       if (fs.statSync(fullPath).isDirectory() || file.endsWith(".zip")) {
+//         console.log(`Removing old version: ${file}`);
+//         if (fs.statSync(fullPath).isDirectory()) {
+//           fs.rmSync(fullPath, { recursive: true });
+//         } else {
+//           fs.unlinkSync(fullPath);
+//         }
+//       }
+//     }
+//   });
+// }
 
 async function main() {
   try {
