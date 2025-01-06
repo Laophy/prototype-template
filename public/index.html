@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    
+    <script>
+      // Game Configuration - Replace these values for your game
+      window.GAME_CONFIG = {
+        title: "Game Title",
+        tagline: "Your Game's Tagline",
+        description: "A short description of your game",
+        keywords: "game, keywords, separated, by, commas",
+        ogDescription: "A longer description for social media sharing. Make it engaging!",
+        twitterDescription: "Another description optimized for Twitter sharing",
+        gameUrl: "https://your-game-url.com",
+        genres: "Genre1, Genre2, Genre3",
+        publisher: "Your Studio Name",
+        currency: "USD",
+        price: "Free",
+        googleFonts: "https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      };
+    </script>
+    
+    <!-- Favicons and Icons -->
+    <link rel="icon" type="image/x-icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/icons/icon-16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/icons/icon-32.png" />
+    <link rel="icon" type="image/png" sizes="64x64" href="%PUBLIC_URL%/icons/icon-64.png" />
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/icons/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/icons/apple-touch-icon.png" />
+    
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="%PUBLIC_URL%/logo512.png" />
+    
+    <!-- Manifest File -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="A short description of your game" />
+    <meta name="keywords" content="game, keywords, separated, by, commas" />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Open Graph Meta Tags for Social Media -->
+    <meta property="og:title" content="Game Title - Your Game's Tagline" />
+    <meta property="og:description" content="A longer description for social media sharing. Make it engaging!" />
+    <meta property="og:image" content="%PUBLIC_URL%/assets/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:url" content="https://your-game-url.com" />
+    <meta property="og:type" content="website" />
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Game Title - Your Game's Tagline" />
+    <meta name="twitter:description" content="Another description optimized for Twitter sharing" />
+    <meta name="twitter:image" content="%PUBLIC_URL%/assets/twitter-card.png" />
+
+    <title>Game Title</title>
+
+    <!-- Structured Data for SEO (JSON-LD) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Game",
+        "name": "Game Title",
+        "description": "A detailed description of your game for search engines",
+        "url": "https://your-game-url.com",
+        "image": "%PUBLIC_URL%/assets/game-thumbnail.jpg",
+        "genre": "Genre1, Genre2, Genre3",
+        "publisher": "Your Studio Name",
+        "offers": {
+          "@type": "Offer",
+          "priceCurrency": "USD",
+          "price": "Free",
+          "url": "https://your-game-url.com"
+        }
+      }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
